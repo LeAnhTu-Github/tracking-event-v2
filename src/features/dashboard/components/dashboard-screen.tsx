@@ -117,7 +117,10 @@ export default function DashboardScreen() {
 
           <div className='flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-end'>
             <div className='text-muted-foreground inline-flex w-fit items-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium'>
-              TIME RANGE
+              <span className='sm:hidden' aria-hidden='true'>
+                📅
+              </span>
+              <span className='hidden sm:inline'>TIME RANGE</span>
             </div>
             <div className='flex flex-wrap items-center gap-2'>
               <input
