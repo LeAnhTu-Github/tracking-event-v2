@@ -21,7 +21,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { cn } from '@/lib/utils';
-import { BASE_URL } from '@/lib/endpoints';
+import axiosInstance from '@/services/api';
 import {
   clearSelectedAppId,
   resolveSelectedAppId,
@@ -87,8 +87,8 @@ export default function SystemSettingsPage() {
 
   const fetchApps = React.useCallback(async () => {
     try {
-      const res = await fetch(`${BASE_URL}/apps`);
-      const data = await res.json();
+      const res = await axiosInstance.get<TrackingApp[]>('/apps');
+      const data = res.data;
       const appList = Array.isArray(data) ? data : [];
       setApps(appList);
 
@@ -160,12 +160,12 @@ export default function SystemSettingsPage() {
     }
 
     try {
-      const res = await fetch(`${BASE_URL}/apps/${appId}/analytics-config`);
-      if (!res.ok) {
+      const res = await axiosInstance.get<AnalyticsConfig>(`/apps/${appId}/analytics-config`);
+      if (res.status < 200 || res.status >= 300) {
         setPreviewData(null);
         return;
       }
-      const data = await res.json();
+      const data = res.data;
       if (data?.events || (Array.isArray(data?.boosters) && data.boosters.length > 0)) {
         setPreviewData(data);
       } else {
@@ -184,8 +184,8 @@ export default function SystemSettingsPage() {
 
     setDictionaryLoading(true);
     try {
-      const res = await fetch(`${BASE_URL}/api/events/dictionary/${appId}`);
-      const json = await res.json();
+      const res = await axiosInstance.get<any>(`/api/events/dictionary/${appId}`);
+      const json = res.data;
       if (json?.success) {
         setDictionaryData({
           total_count: json.total_count,
@@ -219,22 +219,15 @@ export default function SystemSettingsPage() {
     }
 
     const url = isAdding
-      ? `${BASE_URL}/apps`
-      : `${BASE_URL}/apps/${selectedApp?.id}`;
-    const method = isAdding ? 'POST' : 'PUT';
+      ? `/apps`
+      : `/apps/${selectedApp?.id}`;
 
     setIsSaving(true);
     try {
-      const res = await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
-      });
-
-      if (!res.ok) {
-        const err = await res.json().catch(() => null);
-        toast.error(err?.error || 'Save failed');
-        return;
+      if (isAdding) {
+        await axiosInstance.post(url, formData);
+      } else {
+        await axiosInstance.put(url, formData);
       }
 
       toast.success(isAdding ? 'Created new app' : 'Saved changes');
@@ -252,13 +245,7 @@ export default function SystemSettingsPage() {
     if (!ok) return;
 
     try {
-      const res = await fetch(`${BASE_URL}/apps/${app.id}`, {
-        method: 'DELETE'
-      });
-      if (!res.ok) {
-        toast.error('Delete failed');
-        return;
-      }
+      await axiosInstance.delete(`/apps/${app.id}`);
 
       if (selectedApp?.id === app.id) {
         setSelectedApp(null);
@@ -276,10 +263,10 @@ export default function SystemSettingsPage() {
     if (!selectedApp) return;
 
     try {
-      const res = await fetch(
-        `${BASE_URL}/apps/${selectedApp.id}/analytics-config`
+      const res = await axiosInstance.get<AnalyticsConfig>(
+        `/apps/${selectedApp.id}/analytics-config`
       );
-      const data = await res.json();
+      const data = res.data;
       setAnalyticsData(
         data?.events
           ? data
@@ -298,18 +285,10 @@ export default function SystemSettingsPage() {
     if (!selectedApp) return;
 
     try {
-      const res = await fetch(
-        `${BASE_URL}/apps/${selectedApp.id}/analytics-config`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(analyticsData)
-        }
+      await axiosInstance.post(
+        `/apps/${selectedApp.id}/analytics-config`,
+        analyticsData
       );
-      if (!res.ok) {
-        toast.error('Save analytics failed');
-        return;
-      }
 
       toast.success('Analytics configuration saved');
       setShowAnalyticsConfig(false);

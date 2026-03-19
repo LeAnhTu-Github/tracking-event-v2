@@ -6,7 +6,6 @@ import axios, {
   AxiosError,
   InternalAxiosRequestConfig
 } from 'axios';
-import Cookies from 'js-cookie';
 import { toast } from 'sonner';
 import { v4 as uuidv4 } from 'uuid';
 type TError = {
@@ -30,12 +29,19 @@ export interface ApiResponse<T = any> {
 
 // Environment configuration
 const API_CONFIG = {
-  baseURL: process.env.NEXT_PUBLIC_APU_URL || 'http://103.147.34.138:8181/api',
+  baseURL: process.env.NEXT_PUBLIC_BASE_URL || 'https://api.gms.xtel.vn',
   // timeout: 30000,
   headers: {
     'Content-Type': 'application/json'
   }
 } as const;
+
+export const API_BASE_URL: string = API_CONFIG.baseURL;
+
+export const getAbsoluteApiUrl = (path: string): string => {
+  if (!path) return API_BASE_URL;
+  return new URL(path.startsWith('/') ? path : `/${path}`, API_BASE_URL).toString();
+};
 
 const serializeParams = (params: unknown): string => {
   if (!params || typeof params !== 'object') return '';
@@ -75,12 +81,6 @@ const axiosInstance: AxiosInstance = axios.create({
 // Request interceptor for authentication and logging
 axiosInstance.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    const token = Cookies.get('token');
-
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-
     // Add request ID for tracking
     const requestId = generateRequestId();
     if (requestId) {
@@ -119,47 +119,8 @@ axiosInstance.interceptors.response.use(
     return response;
   },
   async (error: AxiosError) => {
-    // Handle 401 unauthorized - token refresh logic
-    // if (error.response?.status === 401 && !originalRequest._retry) {
-    //     originalRequest._retry = true;
-
-    //     try {
-    //         // Attempt to refresh token
-    //         const refreshToken =
-    //             typeof window !== "undefined"
-    //                 ? Cookies.get("refreshToken")
-    //                 : null;
-
-    //         if (refreshToken) {
-    //             const response = await axios.post("/api/auth/refresh", {
-    //                 refreshToken
-    //             });
-
-    //             const { accessToken } = response.data;
-
-    //             if (typeof window !== "undefined") {
-    //                 Cookies.set("token", accessToken);
-    //             }
-
-    //             // Retry original request with new token
-    //             originalRequest.headers.Authorization = `Bearer ${accessToken}`;
-    //             return axiosInstance(originalRequest);
-    //         }
-    //     } catch (refreshError) {
-    //         // Refresh failed, redirect to login
-    //         if (typeof window !== "undefined") {
-    //             Cookies.remove("token");
-    //             window.location.href = "/auth/sign-in";
-    //         }
-    //     }
-    // }
-
     if (error.response?.status === 401) {
-      toast.error('Session expired');
-      if (typeof window !== 'undefined') {
-        Cookies.remove('token');
-        window.location.href = '/auth/sign-in';
-      }
+      toast.error('Unauthorized');
       return Promise.reject(error);
     }
 

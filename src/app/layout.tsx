@@ -7,7 +7,6 @@ import type { Metadata, Viewport } from 'next';
 import { cookies } from 'next/headers';
 import NextTopLoader from 'nextjs-toploader';
 import { NuqsAdapter } from 'nuqs/adapters/next/app';
-import AuthProvider from '@/providers/auth-provider';
 import './globals.css';
 import './theme.css';
 
@@ -17,8 +16,8 @@ const META_THEME_COLORS = {
 };
 
 export const metadata: Metadata = {
-  title: 'CMS SuperStars',
-  description: 'CMS SuperStars'
+  title: 'GameStats',
+  description: 'GameStats'
 };
 
 export const viewport: Viewport = {
@@ -68,10 +67,8 @@ export default async function RootLayout({
             enableColorScheme
           >
             <Providers activeThemeValue={activeThemeValue as string}>
-              <AuthProvider>
-                <Toaster position='top-right' richColors closeButton />
-                {children}
-              </AuthProvider>
+              <Toaster position='top-right' richColors closeButton />
+              {children}
             </Providers>
           </ThemeProvider>
         </NuqsAdapter>

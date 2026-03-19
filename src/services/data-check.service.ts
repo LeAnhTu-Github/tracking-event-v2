@@ -2,28 +2,40 @@ import {
   DataCheckFilterOptions,
   DataCheckListParams,
   DataCheckListResponse,
+  DataCheckPagination,
   TrackingApp
 } from '@/features/data-check/types';
-import { APPS_ENDPOINT, BASE_URL } from '@/lib/endpoints';
+import axiosInstance, { getAbsoluteApiUrl } from '@/services/api';
 
-const readJson = async (res: Response) => {
-  try {
-    return await res.json();
-  } catch {
-    return null;
-  }
+type DataCheckFilterOptionsApiResponse = {
+  versions?: unknown;
+  geos?: unknown;
+};
+
+type DataCheckListApiResponse = {
+  data?: unknown;
+  pagination?: DataCheckPagination;
+};
+
+const isDataCheckFilterOptionsApiResponse = (
+  value: unknown
+): value is DataCheckFilterOptionsApiResponse => {
+  return !!value && typeof value === 'object';
+};
+
+const isDataCheckListApiResponse = (value: unknown): value is DataCheckListApiResponse => {
+  return !!value && typeof value === 'object';
 };
 
 const dataCheckService = {
   getApps: async (): Promise<TrackingApp[]> => {
-    const res = await fetch(APPS_ENDPOINT);
-    const data = await readJson(res);
-    return Array.isArray(data) ? data : [];
+    const res = await axiosInstance.get<TrackingApp[]>('/apps');
+    return Array.isArray(res.data) ? res.data : [];
   },
 
   getFilterOptions: async (appId: number): Promise<DataCheckFilterOptions> => {
-    const res = await fetch(`${BASE_URL}/api/filters/options/${appId}`);
-    const json = await readJson(res);
+    const res = await axiosInstance.get<unknown>(`/api/filters/options/${appId}`);
+    const json = isDataCheckFilterOptionsApiResponse(res.data) ? res.data : {};
 
     const versions = Array.isArray(json?.versions) ? json.versions : [];
     const geos = Array.isArray(json?.geos) ? json.geos : [];
@@ -49,10 +61,10 @@ const dataCheckService = {
       query.append('geo', params.geo);
     }
 
-    const res = await fetch(
-      `${BASE_URL}/api/data-check/${params.appId}?${query.toString()}`
+    const res = await axiosInstance.get<unknown>(
+      `/api/data-check/${params.appId}?${query.toString()}`
     );
-    const json = await readJson(res);
+    const json = isDataCheckListApiResponse(res.data) ? res.data : {};
 
     if (Array.isArray(json)) {
       return {
@@ -96,7 +108,7 @@ const dataCheckService = {
       query.append('geo', params.geo);
     }
 
-    return `${BASE_URL}/api/datacheck/export/${params.appId}?${query.toString()}`;
+    return getAbsoluteApiUrl(`/api/datacheck/export/${params.appId}?${query.toString()}`);
   }
 };
 

@@ -45,3 +45,7 @@ export type ManualJobPayload = {
   endTime: string;
   executionTime?: string;
 };
+
+export type CreateManualJobResponse = {
+  message?: string;
+};

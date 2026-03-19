@@ -1,13 +1,6 @@
-import { cookies } from 'next/headers';
-import { redirect } from 'next/navigation';
-
 export default async function Dashboard() {
-  const cookieStore = await cookies();
-  const token = cookieStore.get('token');
+  const DashboardScreen = (await import('@/features/dashboard/components/dashboard-screen'))
+    .default;
 
-  if (!token) {
-    return redirect('/auth/sign-in');
-  } else {
-    redirect('/dashboard/overview');
-  }
+  return <DashboardScreen />;
 }

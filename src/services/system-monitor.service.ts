@@ -1,27 +1,26 @@
 import {
+  CreateManualJobResponse,
   ManualJobPayload,
+  MonitorPagination,
   MonitorHistoryParams,
   MonitorHistoryResponse,
   TrackingApp
 } from '@/features/system-monitor/types';
-import {
-  APPS_ENDPOINT,
-  BASE_URL
-} from '@/lib/endpoints';
+import axiosInstance, { getAbsoluteApiUrl } from '@/services/api';
 
-const readJson = async (res: Response) => {
-  try {
-    return await res.json();
-  } catch {
-    return null;
-  }
+type MonitorHistoryApiResponse = {
+  data?: unknown;
+  pagination?: MonitorPagination;
+};
+
+const isMonitorHistoryApiResponse = (value: unknown): value is MonitorHistoryApiResponse => {
+  return !!value && typeof value === 'object';
 };
 
 const systemMonitorService = {
   getApps: async (): Promise<TrackingApp[]> => {
-    const res = await fetch(APPS_ENDPOINT);
-    const data = await readJson(res);
-    return Array.isArray(data) ? data : [];
+    const res = await axiosInstance.get<TrackingApp[]>('/apps');
+    return Array.isArray(res.data) ? res.data : [];
   },
 
   getHistory: async (
@@ -36,10 +35,10 @@ const systemMonitorService = {
     if (params.startDate) query.append('start_date', params.startDate);
     if (params.endDate) query.append('end_date', params.endDate);
 
-    const res = await fetch(
-      `${BASE_URL}/monitor/history?${query.toString()}`
+    const res = await axiosInstance.get<unknown>(
+      `/monitor/history?${query.toString()}`
     );
-    const json = await readJson(res);
+    const json = isMonitorHistoryApiResponse(res.data) ? res.data : {};
 
     if (Array.isArray(json)) {
       return {
@@ -66,68 +65,33 @@ const systemMonitorService = {
 
     if (retryJobId) body.retry_job_id = retryJobId;
 
-    const res = await fetch(`${BASE_URL}/etl/run/${appId}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body)
-    });
-
-    if (!res.ok) {
-      throw new Error('Failed to trigger job');
-    }
-
-    return readJson(res);
+    const res = await axiosInstance.post<unknown>(`/etl/run/${appId}`, body);
+    return res.data;
   },
 
-  createManualJob: async (payload: ManualJobPayload) => {
-    const res = await fetch(`${BASE_URL}/api/create_manual_job`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        app_id: payload.appId,
-        start_time: payload.startTime,
-        end_time: payload.endTime,
-        execution_time: payload.executionTime || null
-      })
+  createManualJob: async (payload: ManualJobPayload): Promise<CreateManualJobResponse> => {
+    const res = await axiosInstance.post<CreateManualJobResponse>('/api/create_manual_job', {
+      app_id: payload.appId,
+      start_time: payload.startTime,
+      end_time: payload.endTime,
+      execution_time: payload.executionTime || null
     });
-
-    const json = await readJson(res);
-
-    if (!res.ok) {
-      throw new Error(json?.error || 'Create manual job failed');
-    }
-
-    return json;
+    return res.data;
   },
 
   stopJob: async (jobId: number) => {
-    const res = await fetch(`${BASE_URL}/etl/stop/${jobId}`, {
-      method: 'POST'
-    });
-    if (!res.ok) {
-      throw new Error('Failed to stop job');
-    }
+    await axiosInstance.post(`/etl/stop/${jobId}`);
   },
 
   deleteAllHistory: async (appId: number) => {
-    const res = await fetch(`${BASE_URL}/monitor/purge?app_id=${appId}`, {
-      method: 'DELETE'
-    });
-    if (!res.ok) {
-      throw new Error('Failed to delete all history');
-    }
+    await axiosInstance.delete(`/monitor/purge?app_id=${appId}`);
   },
 
   deleteHistory: async (jobId: number) => {
-    const res = await fetch(`${BASE_URL}/monitor/history/${jobId}`, {
-      method: 'DELETE'
-    });
-    if (!res.ok) {
-      throw new Error('Failed to delete record');
-    }
+    await axiosInstance.delete(`/monitor/history/${jobId}`);
   },
 
-  getExportUrl: (jobId: number) => `${BASE_URL}/monitor/export/${jobId}`
+  getExportUrl: (jobId: number) => getAbsoluteApiUrl(`/monitor/export/${jobId}`)
 };
 
 export default systemMonitorService;

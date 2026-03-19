@@ -6,8 +6,8 @@ import type { Metadata } from 'next';
 import { cookies } from 'next/headers';
 
 export const metadata: Metadata = {
-  title: 'SuperStars Dashboard',
-  description: 'SuperStars Dashboard'
+  title: 'GameStats Dashboard',
+  description: 'GameStats Dashboard'
 };
 
 export default async function DashboardLayout({

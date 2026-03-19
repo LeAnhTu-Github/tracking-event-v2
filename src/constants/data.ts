@@ -11,75 +11,7 @@ export type Product = {
   updated_at: string;
 };
 
-// NOTE: Navigation is now dynamic from API /user/info endpoint
-// The sidebar and KBar components use pageRoles from useAuthStore instead of static navItems
-// Keeping this for reference only - not used in the application anymore
-/*
-export const navItems: NavItem[] = [
-  {
-    title: 'Dashboard',
-    url: '/dashboard/overview',
-    icon: 'dashboard',
-    isActive: false,
-    shortcut: ['d', 'd'],
-    items: []
-  },
-  {
-    title: 'Account',
-    url: '#',
-    icon: 'billing',
-    isActive: true,
-
-    items: [
-      {
-        title: 'Profile',
-        url: '/dashboard/profile',
-        icon: 'userPen',
-        shortcut: ['m', 'm']
-      },
-      {
-        title: 'Login',
-        shortcut: ['l', 'l'],
-        url: '/',
-        icon: 'login'
-      }
-    ]
-  },
-  {
-    title: 'Image',
-    url: '/dashboard/image',
-    icon: 'media',
-    shortcut: ['c', 'c'],
-    isActive: false,
-    items: []
-  },
-  {
-    title: 'System',
-    url: '/dashboard/system',
-    icon: 'settings',
-    shortcut: ['s', 's'],
-    isActive: false,
-    items: [
-      {
-        title: 'Users',
-        url: '/dashboard/system/users',
-        icon: 'user',
-        shortcut: ['u', 'u'],
-        isActive: false,
-        items: []
-      },
-      {
-        title: 'User Groups',
-        url: '/dashboard/system/user-groups',
-        icon: 'user2',
-        shortcut: ['g', 'g'],
-        isActive: false,
-        items: []
-      }
-    ]
-  }
-];
-*/
+export const navItems: NavItem[] = [];
 
 export interface SaleUser {
   id: number;

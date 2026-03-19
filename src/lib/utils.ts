@@ -1,6 +1,5 @@
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
-import { PageRole } from '@/types/user.type';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -24,47 +23,6 @@ export function formatBytes(
       ? (accurateSizes[i] ?? 'Bytest')
       : (sizes[i] ?? 'Bytes')
   }`;
-}
-
-export function arrayToTree(flatArray: PageRole[]): PageRole[] {
-  // Tạo Map để tra cứu nhanh các node theo id
-  const nodeMap = new Map<number, PageRole>();
-  const result: PageRole[] = [];
-
-  // Khởi tạo tất cả nodes và thêm vào Map
-  flatArray.forEach((item) => {
-    const node: PageRole = { ...item, children: [] };
-    nodeMap.set(item.id, node);
-  });
-
-  // Xây dựng cấu trúc tree
-  flatArray.forEach((item) => {
-    const node = nodeMap.get(item.id)!;
-
-    if (item.parentId === 0) {
-      // Node gốc (parentId = 0)
-      result.push(node);
-    } else {
-      // Node con - thêm vào children của parent
-      const parent = nodeMap.get(item.parentId);
-      if (parent) {
-        parent.children!.push(node);
-      }
-    }
-  });
-
-  // Sắp xếp theo menuIndex ở mỗi cấp
-  const sortByMenuIndex = (nodes: PageRole[]) => {
-    nodes.sort((a, b) => a.menuIndex - b.menuIndex);
-    nodes.forEach((node) => {
-      if (node.children && node.children.length > 0) {
-        sortByMenuIndex(node.children);
-      }
-    });
-  };
-
-  sortByMenuIndex(result);
-  return result;
 }
 
 export function formatSort(

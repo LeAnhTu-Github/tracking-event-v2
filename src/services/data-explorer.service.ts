@@ -1,11 +1,6 @@
 import { z } from 'zod';
 
-import {
-  APPS_ENDPOINT,
-  DROPPED_USERS_ENDPOINT,
-  EVENTS_SEARCH_ENDPOINT,
-  LEVELS_ENDPOINT
-} from '@/lib/endpoints';
+import axiosInstance from '@/services/api';
 import type {
   DroppedUsersResponse,
   EventsSearchParams,
@@ -13,14 +8,6 @@ import type {
   TrackingApp,
   TrackingEventRow
 } from '@/features/data-explorer/types';
-
-const readJson = async (res: Response) => {
-  try {
-    return await res.json();
-  } catch {
-    return null;
-  }
-};
 
 const trackingAppSchema = z.object({
   id: z.number(),
@@ -92,16 +79,18 @@ const buildEventsSearchQuery = (params: EventsSearchParams) => {
 
 const dataExplorerService = {
   getApps: async (): Promise<TrackingApp[]> => {
-    const res = await fetch(APPS_ENDPOINT);
-    const json = await readJson(res);
+    const res = await axiosInstance.get<TrackingApp[]>('/apps');
+    const json = res.data;
     const parsed = z.array(trackingAppSchema).safeParse(json);
     return parsed.success ? parsed.data : [];
   },
 
   getLevels: async (appId: number): Promise<string[]> => {
-    const res = await fetch(LEVELS_ENDPOINT(appId));
-    const json = await readJson(res);
-    const parsed = z.union([z.array(z.string()), z.object({ data: z.array(z.string()) })]).safeParse(json);
+    const res = await axiosInstance.get<unknown>(`/api/levels/${appId}`);
+    const json = res.data;
+    const parsed = z
+      .union([z.array(z.string()), z.object({ data: z.array(z.string()) })])
+      .safeParse(json);
     if (!parsed.success) return [];
     return Array.isArray(parsed.data) ? parsed.data : parsed.data.data;
   },
@@ -118,8 +107,10 @@ const dataExplorerService = {
       end_date: params.endDate
     });
 
-    const res = await fetch(`${DROPPED_USERS_ENDPOINT(params.appId)}?${query.toString()}`);
-    const json = await readJson(res);
+    const res = await axiosInstance.get<unknown>(
+      `/api/dropped-users/${params.appId}?${query.toString()}`
+    );
+    const json = res.data;
 
     const schema: z.ZodType<DroppedUsersResponse> = z.object({
       success: z.boolean(),
@@ -145,8 +136,8 @@ const dataExplorerService = {
 
   searchEvents: async (params: EventsSearchParams) => {
     const query = buildEventsSearchQuery(params);
-    const res = await fetch(`${EVENTS_SEARCH_ENDPOINT}?${query.toString()}`);
-    const json = await readJson(res);
+    const res = await axiosInstance.get<unknown>(`/events/search?${query.toString()}`);
+    const json = res.data;
 
     const parsed = eventsSearchResponseSchema.safeParse(json);
     if (parsed.success) {

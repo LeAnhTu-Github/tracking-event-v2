@@ -10,66 +10,54 @@ import { useRouter } from 'next/navigation';
 import { useMemo } from 'react';
 import RenderResults from './render-result';
 import useThemeSwitching from './use-theme-switching';
-import { useAuthStore } from '@/store/useAuth';
 
 export default function KBar({ children }: { children: React.ReactNode }) {
   const router = useRouter();
-  const { pageRoles } = useAuthStore();
-
-  // These action are for the navigation
-  const actions = useMemo(() => {
-    // Define navigateTo inside the useMemo callback to avoid dependency array issues
-    const navigateTo = (url: string) => {
-      router.push(url);
-    };
-
-    if (!pageRoles || pageRoles.length === 0) {
-      return [];
-    }
-
-    // Create a map to find parent by id
-    const parentMap = new Map<number, { pageName: string; pageUrl: string }>();
-    pageRoles.forEach((item) => {
-      if (item.parentId === 0) {
-        parentMap.set(item.id, {
-          pageName: item.pageName,
-          pageUrl: item.pageUrl
-        });
+  const actions = useMemo(
+    () => [
+      {
+        id: 'dashboardAction',
+        name: 'Dashboard',
+        keywords: 'dashboard',
+        section: 'Navigation',
+        subtitle: 'Go to Dashboard',
+        perform: () => router.push('/dashboard')
+      },
+      {
+        id: 'systemSettingsAction',
+        name: 'System Settings',
+        keywords: 'system settings settings',
+        section: 'Navigation',
+        subtitle: 'Go to System Settings',
+        perform: () => router.push('/dashboard/system/settings')
+      },
+      {
+        id: 'systemMonitorAction',
+        name: 'System Monitor',
+        keywords: 'system monitor monitor',
+        section: 'Navigation',
+        subtitle: 'Go to System Monitor',
+        perform: () => router.push('/dashboard/system/monitor')
+      },
+      {
+        id: 'dataCheckAction',
+        name: 'Data Check',
+        keywords: 'data check datacheck',
+        section: 'Navigation',
+        subtitle: 'Go to Data Check',
+        perform: () => router.push('/dashboard/check-data')
+      },
+      {
+        id: 'dataExplorerAction',
+        name: 'Data Explorer',
+        keywords: 'data explorer explorer',
+        section: 'Navigation',
+        subtitle: 'Go to Data Explorer',
+        perform: () => router.push('/dashboard/data-explorer')
       }
-    });
-
-    return pageRoles.flatMap((pageRole) => {
-      // Only include base action if the pageRole has a real URL
-      const baseAction =
-        pageRole.pageUrl && pageRole.pageUrl !== '#'
-          ? {
-              id: `${pageRole.pageName.toLowerCase().replace(/\s+/g, '-')}Action`,
-              name: pageRole.pageName,
-              keywords: pageRole.pageName.toLowerCase(),
-              section:
-                pageRole.parentId === 0
-                  ? 'Navigation'
-                  : parentMap.get(pageRole.parentId)?.pageName || 'Navigation',
-              subtitle: `Go to ${pageRole.pageName}`,
-              perform: () => navigateTo(pageRole.pageUrl)
-            }
-          : null;
-
-      // Map child items into actions
-      const childActions =
-        pageRole.children?.map((childItem) => ({
-          id: `${childItem.pageName.toLowerCase().replace(/\s+/g, '-')}Action`,
-          name: childItem.pageName,
-          keywords: childItem.pageName.toLowerCase(),
-          section: pageRole.pageName,
-          subtitle: `Go to ${childItem.pageName}`,
-          perform: () => navigateTo(childItem.pageUrl)
-        })) ?? [];
-
-      // Return only valid actions (ignoring null base actions for containers)
-      return baseAction ? [baseAction, ...childActions] : childActions;
-    });
-  }, [router, pageRoles]);
+    ],
+    [router]
+  );
 
   return (
     <KBarProvider actions={actions}>

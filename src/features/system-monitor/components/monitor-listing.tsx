@@ -33,7 +33,12 @@ import { Label } from '@/components/ui/label';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import SimpleTablePagination from '@/components/ui/table/simple-table-pagination';
 import { useMonitorHistory } from '@/features/system-monitor/hooks/use-monitor-history';
-import { MonitorJob, MonitorPagination, TrackingApp } from '@/features/system-monitor/types';
+import type {
+  CreateManualJobResponse,
+  MonitorJob,
+  MonitorPagination,
+  TrackingApp
+} from '@/features/system-monitor/types';
 import {
   resolveSelectedAppId,
   SELECTED_APP_CHANGED_EVENT
@@ -325,7 +330,8 @@ export default function MonitorListing() {
     }
 
     try {
-      const result = await systemMonitorService.createManualJob(manualConfig);
+      const result: CreateManualJobResponse =
+        await systemMonitorService.createManualJob(manualConfig);
       toast.success(result?.message || 'Create manual job success');
       setShowManualModal(false);
       setPage(1);

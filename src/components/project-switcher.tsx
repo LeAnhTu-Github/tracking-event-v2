@@ -1,7 +1,6 @@
 'use client';
 
 import * as React from 'react';
-import axios from 'axios';
 import { Check, ChevronsUpDown, Plus } from 'lucide-react';
 
 import {
@@ -16,7 +15,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem
 } from '@/components/ui/sidebar';
-import { APPS_ENDPOINT } from '@/lib/endpoints';
+import axiosInstance from '@/services/api';
 import {
   resolveSelectedAppId,
   SELECTED_APP_CHANGED_EVENT,
@@ -43,7 +42,7 @@ export function ProjectSwitcher() {
   React.useEffect(() => {
     const fetchApps = async () => {
       try {
-        const response = await axios.get<TrackingApp[]>(APPS_ENDPOINT);
+        const response = await axiosInstance.get<TrackingApp[]>('/apps');
         const appList = Array.isArray(response.data) ? response.data : [];
         setApps(appList);
 

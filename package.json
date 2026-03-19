@@ -1,10 +1,10 @@
 {
-  "name": "CMS-SuperStars",
+  "name": "tracking-cms",
   "version": "1.0.0",
   "private": true,
   "author": {
     "name": "AnhTus",
-    "url": "https://gitlab.xtel.vn/tu.leanh/cms-superstars"
+    "url": "https://github.com/LeAnhTu-Github/tracking-event-v2"
   },
   "scripts": {
     "dev": "next dev --turbopack",
