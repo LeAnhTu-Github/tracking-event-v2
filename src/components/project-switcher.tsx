@@ -91,24 +91,24 @@ export function ProjectSwitcher() {
   return (
     <SidebarMenu>
       <SidebarMenuItem>
-        <p className='text-sidebar-foreground/70 px-2 pb-2 text-xs font-semibold tracking-wider uppercase'>
+        <p className='text-sidebar-foreground/70 px-2 pb-2 text-xs font-semibold tracking-wider uppercase group-data-[collapsible=icon]:hidden'>
           Active Project
         </p>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <SidebarMenuButton
               size='lg'
-              className='data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground border-sidebar-border border'
+              className='data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground border-sidebar-border border group-data-[collapsible=icon]:justify-center'
             >
               <div className='bg-primary/10 text-primary flex aspect-square size-8 items-center justify-center rounded-md text-xs font-semibold'>
                 {selectedApp ? getInitials(selectedApp.name) : '--'}
               </div>
-              <div className='grid flex-1 text-left text-sm leading-tight'>
+              <div className='grid flex-1 text-left text-sm leading-tight group-data-[collapsible=icon]:hidden'>
                 <span className='truncate font-medium'>
                   {selectedApp?.name || 'No project'}
                 </span>
               </div>
-              <ChevronsUpDown className='ml-auto size-4' />
+              <ChevronsUpDown className='ml-auto size-4 group-data-[collapsible=icon]:hidden' />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent

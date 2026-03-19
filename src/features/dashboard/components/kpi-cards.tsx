@@ -1,4 +1,4 @@
-import { Activity, Coins, Timer, Users } from 'lucide-react';
+import { Coins, Gauge, Timer, Users } from 'lucide-react';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import type { DashboardCard } from '@/api/dashboard/types';
@@ -44,28 +44,28 @@ export default function KpiCards({ cards }: KpiCardsProps) {
   return (
     <div className='grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4'>
       <KpiCard
-        title='Active users'
+        title='Avg Playtime'
+        value={`${cards.avg_time.toFixed(1)}s`}
+        helper='Average session duration'
+        icon={Timer}
+      />
+      <KpiCard
+        title='Total Sessions'
         value={cards.active_users.toLocaleString()}
-        helper='Sessions / active players (range)'
+        helper='Total sessions in range'
         icon={Users}
       />
       <KpiCard
-        title='Revenue'
-        value={cards.revenue.toLocaleString()}
-        helper='IAP revenue (range)'
-        icon={Activity}
-      />
-      <KpiCard
-        title='Total spent'
+        title='Virtual Economy'
         value={cards.total_spent.toLocaleString()}
-        helper='Coins sunk (range)'
+        helper='Total currency spent'
         icon={Coins}
       />
       <KpiCard
         title='Avg fail rate'
         value={`${cards.avg_fail_rate.toFixed(1)}%`}
         helper='Average difficulty'
-        icon={Timer}
+        icon={Gauge}
       />
     </div>
   );

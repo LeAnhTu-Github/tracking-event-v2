@@ -61,7 +61,11 @@ export default function AppSidebar() {
           href='/dashboard'
           className='mb-1 flex items-center gap-2 px-2 py-3'
         >
-          <BrandMark withText className='flex items-center gap-2' />
+          <BrandMark
+            withText
+            className='flex items-center gap-2'
+            textClassName='text-primary text-lg font-semibold group-data-[collapsible=icon]:hidden'
+          />
         </Link>
         <ProjectSwitcher />
       </SidebarHeader>
