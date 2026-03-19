@@ -44,21 +44,15 @@ import { Icons } from '@/components/icons';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import * as React from 'react';
-import { OrgSwitcher } from '../org-switcher';
 import { useAuthStore } from '@/store/useAuth';
 import { useLayoutStore } from '@/store/useLayout';
 import { cn } from '@/lib/utils';
+import { ProjectSwitcher } from '@/components/project-switcher';
 export const company = {
   name: 'Acme Inc',
   logo: IconPhotoUp,
   plan: 'Enterprise'
 };
-
-const tenants = [
-  { id: '1', name: 'Acme Inc' },
-  { id: '2', name: 'Beta Corp' },
-  { id: '3', name: 'Gamma Ltd' }
-];
 
 export default function AppSidebar() {
   const pathname = usePathname();
@@ -72,10 +66,6 @@ export default function AppSidebar() {
   const [openCollapsibles, setOpenCollapsibles] = React.useState<
     Record<string, boolean>
   >({});
-
-  const handleSwitchTenant = (_tenantId: string) => {};
-
-  const activeTenant = tenants[0];
 
   React.useEffect(() => {}, [isOpen]);
   React.useEffect(() => {
@@ -130,14 +120,33 @@ export default function AppSidebar() {
     }));
   };
 
+  const staticQuickLinks = [
+    {
+      pageName: 'System Settings',
+      pageUrl: '/dashboard/system/settings',
+      pageIcon: 'settings'
+    },
+    {
+      pageName: 'System Monitor',
+      pageUrl: '/dashboard/system/monitor',
+      pageIcon: 'dashboard'
+    },
+    {
+      pageName: 'Data Check',
+      pageUrl: '/dashboard/check-data',
+      pageIcon: 'check'
+    },
+    {
+      pageName: 'Data Explorer',
+      pageUrl: '/dashboard/data-explorer',
+      pageIcon: 'search'
+    }
+  ] as const;
+
   return (
     <Sidebar collapsible='icon'>
       <SidebarHeader>
-        <OrgSwitcher
-          tenants={tenants}
-          defaultTenant={activeTenant}
-          onTenantSwitch={handleSwitchTenant}
-        />
+        <ProjectSwitcher />
       </SidebarHeader>
       <SidebarContent className='overflow-x-hidden'>
         <SidebarGroup>
@@ -208,6 +217,40 @@ export default function AppSidebar() {
                 </Collapsible>
               ) : (
                 <SidebarMenuItem key={itemKey}>
+                  <SidebarMenuButton
+                    asChild
+                    tooltip={item.pageName}
+                    isActive={pathname === item.pageUrl}
+                    className={cn(
+                      'transition-all duration-200',
+                      pathname === item.pageUrl &&
+                        'bg-primary/10 text-primary font-medium shadow-sm'
+                    )}
+                  >
+                    <Link href={item.pageUrl}>
+                      {IconComponent && (
+                        <IconComponent
+                          className={cn(
+                            'h-5 w-5 transition-colors duration-200',
+                            pathname === item.pageUrl && 'text-primary'
+                          )}
+                        />
+                      )}
+                      <span>{item.pageName}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              );
+            })}
+          </SidebarMenu>
+        </SidebarGroup>
+        <SidebarGroup>
+          <SidebarGroupLabel>Quick Access</SidebarGroupLabel>
+          <SidebarMenu>
+            {staticQuickLinks.map((item) => {
+              const IconComponent = getIconComponent(item.pageIcon);
+              return (
+                <SidebarMenuItem key={item.pageUrl}>
                   <SidebarMenuButton
                     asChild
                     tooltip={item.pageName}

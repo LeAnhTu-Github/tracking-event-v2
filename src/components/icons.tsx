@@ -40,7 +40,8 @@ import {
   IconBox,
   IconPackage,
   IconShoppingCart,
-  IconBadgeAd
+  IconBadgeAd,
+  IconSearch
 } from '@tabler/icons-react';
 
 export type Icon = React.ComponentType<IconProps>;
@@ -88,5 +89,6 @@ export const Icons = {
   itemsConfig: IconBox,
   packageConfig: IconPackage,
   adsConfig: IconBadgeAd,
-  shopConfig: IconShoppingCart
+  shopConfig: IconShoppingCart,
+  search: IconSearch
 };
